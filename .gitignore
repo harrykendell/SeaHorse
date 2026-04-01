@@ -39,7 +39,6 @@ __pycache__/
 
 # Executables or analysis
 /output
-/bin
 
 # cached data
 /.cache
@@ -47,8 +46,10 @@ __pycache__/
 *CMakeFiles
 *cmake_install.cmake
 *CMakeCache.txt
-seahorse/Makefile
-seahorse_next/build
-seahorse_next/dist
-seahorse_next/.venv
+seahorse/build
+seahorse/dist
+seahorse/.venv
+seahorse-old/build
+seahorse-old/bin
+seahorse-old/test.json
 .codex

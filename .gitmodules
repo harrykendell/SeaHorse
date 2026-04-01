@@ -4,9 +4,9 @@
 [submodule "libs/spectra"]
 	path = libs/spectra
 	url = https://github.com/yixuan/spectra
-[submodule "libs/raylib"]
-	path = libs/raylib
+[submodule "seahorse-old/libs/raylib"]
+	path = seahorse-old/libs/raylib
 	url = https://github.com/raysan5/raylib
-[submodule "libs/raygui"]
-	path = libs/raygui
+[submodule "seahorse-old/libs/raygui"]
+	path = seahorse-old/libs/raygui
 	url = https://github.com/raysan5/raygui

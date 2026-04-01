@@ -1,52 +1,33 @@
-# SeaHorse
-Quantum Simulation and Optimal Control.
+# Seahorse Monorepo
 
-## Included libraries
+This repository currently contains two projects:
 
-<b>These are included as submodules. </b>
-* <ins>Eigen:</ins>
-  
-	Used for fast linear algebra calculations. The MKL backend allows it to go as fast as possible :)
+- [`seahorse/`](/home/ae19663/Desktop/seahorse/seahorse): the current Python-first library with a nanobind-powered C++ core
+- [`seahorse-old/`](/home/ae19663/Desktop/seahorse/seahorse-old): the legacy C++ application and GUI, kept operational for reference and migration work
 
-* <ins>Spectra:</ins>
+Shared third-party numerical dependencies remain in [`libs/`](/home/ae19663/Desktop/seahorse/libs) because both projects use them.
+Legacy GUI-specific dependencies now live inside [`seahorse-old/libs/`](/home/ae19663/Desktop/seahorse/seahorse-old/libs).
 
-	Used for generating eigenvectors.
-	This is substantially faster than Eigen's default implementation as it allows us to request only a specific number instead of the full specturm.
+## Main Project
 
-* <ins>Raylib + Raygui:</ins>
+The active package is in [`seahorse/`](/home/ae19663/Desktop/seahorse/seahorse).
 
-	Used for the graphical interface.
-	This is only included for the gui target
+Typical development flow:
 
-## Required libraries
+```bash
+cd seahorse
+./scripts/build_and_install_local.sh
+python -m pytest tests/python
+```
 
-<b>These should live on your path somewhere. </b>
-* <ins>MKL:</ins>
-  
-	Used for fast maths. We could support not needing this in the future?
+## Legacy Project
 
-## Installing
-On first run you need to initialise and update the submodules:
+The old application has been moved under [`seahorse-old/`](/home/ae19663/Desktop/seahorse/seahorse-old).
 
-`git submodule update --init --recursive`
+Typical legacy build flow:
 
-## Building
-We use the make build system - ideally this should separate the seahorse parts and user parts to reduce compile times but that needs some thoughful design
-
-Any *.cpp in the projects file can be built using:
-
-`make * -j8`
-
-or all at once with
-
-`make all -j8`
-
-which will create an executable in /bin.
-
-
-## On the BC4 Cluster
-* Load modules:
-        - tools/cmake/3.20.0
-        - languages/gcc/10.4.0
-- we need to ensure configuration with these properties
-- we need to ensure the default cmake/g++ are the ones we just loaded
+```bash
+cd seahorse-old
+make all -j8
+make gui -j8
+```

@@ -1,0 +1,56 @@
+[build-system]
+requires = [
+  "nanobind>=2.4",
+  "scikit-build-core>=0.10",
+]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "seahorse"
+version = "0.1.0"
+description = "Python-first quantum spatial simulation and optimisation with a nanobind-powered C++ core."
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [
+  { name = "SeaHorse contributors" },
+]
+dependencies = [
+  "numpy>=1.23",
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: C++",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Topic :: Scientific/Engineering :: Physics",
+]
+
+[project.optional-dependencies]
+dev = [
+  "mypy>=1.11",
+  "pytest>=8.0",
+  "ruff>=0.6",
+]
+
+[tool.scikit-build]
+build-dir = "build/{wheel_tag}"
+cmake.source-dir = "."
+wheel.packages = ["src/python/seahorse"]
+
+[tool.cibuildwheel]
+build = "cp39-* cp310-* cp311-* cp312-*"
+skip = "pp* *-musllinux_* *-win32"
+build-verbosity = 1
+test-command = "python -c \"import seahorse._core as core; grid = core.Grid1D(8, -1.0, 1.0); print(grid.dim)\""
+archs = ["auto64"]
+
+[tool.pytest.ini_options]
+addopts = "-ra"
+testpaths = [
+  "tests/python",
+]
+markers = [
+  "native: exercises the compiled nanobind extension when available",
+]
