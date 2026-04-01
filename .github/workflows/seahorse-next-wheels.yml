@@ -1,0 +1,55 @@
+name: Seahorse Next Wheels
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/seahorse-next-wheels.yml"
+      - ".gitmodules"
+      - "seahorse_next/**"
+  push:
+    branches:
+      - main
+    tags:
+      - "v*"
+    paths:
+      - ".github/workflows/seahorse-next-wheels.yml"
+      - ".gitmodules"
+      - "seahorse_next/**"
+
+permissions:
+  contents: write
+
+jobs:
+  build-linux-wheels:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.21.3
+        with:
+          package-dir: seahorse_next
+          output-dir: seahorse_next/dist
+
+      - name: Upload wheel artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: seahorse-next-linux-wheels
+          path: seahorse_next/dist/*.whl
+          if-no-files-found: error
+
+      - name: Publish tagged wheels to GitHub release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: seahorse_next/dist/*.whl
