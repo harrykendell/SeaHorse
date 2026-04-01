@@ -34,6 +34,17 @@ dev = [
   "ruff>=0.6",
 ]
 
+[tool.ruff]
+src = ["src/python", "tests/python", "examples"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["seahorse"]
+
+[tool.mypy]
+files = ["src/python", "tests/python", "examples"]
+mypy_path = "$MYPY_CONFIG_FILE_DIR/src/python"
+explicit_package_bases = true
+
 [tool.scikit-build]
 build-dir = "build/{wheel_tag}"
 cmake.source-dir = "."

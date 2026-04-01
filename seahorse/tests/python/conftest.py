@@ -13,19 +13,19 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 SRC_PYTHON = PROJECT_ROOT / "src" / "python"
 
 try:
-    import seahorse  # type: ignore[import-not-found]  # noqa: F401
+    import seahorse as _seahorse
 except ImportError:
     if str(SRC_PYTHON) not in sys.path:
         sys.path.insert(0, str(SRC_PYTHON))
 else:
-    import seahorse as _seahorse
-
     if not hasattr(_seahorse, "__version__"):
         sys.modules.pop("seahorse", None)
         importlib.invalidate_caches()
         if str(SRC_PYTHON) not in sys.path:
             sys.path.insert(0, str(SRC_PYTHON))
-        import seahorse  # type: ignore[import-not-found]  # noqa: F401
+        _seahorse = importlib.import_module("seahorse")
+        if not hasattr(_seahorse, "__version__"):
+            raise RuntimeError("Failed to import the source seahorse package from src/python.")
 
 
 def _iter_native_candidates() -> list[Path]:
