@@ -1,3 +1,5 @@
+"""Control-basis primitives used by the Python-side optimisation layer."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -9,6 +11,8 @@ from .potentials import planck_taper
 
 
 class TrigMode(str, Enum):
+    """Coefficient layout used by :class:`TrigBasis`."""
+
     AMPLITUDE = "amplitude"
     AMP_FREQ = "amp_freq"
     AMP_PHASE = "amp_phase"
@@ -17,6 +21,8 @@ class TrigMode(str, Enum):
 
 @dataclass
 class TrigBasis:
+    """Randomised trigonometric basis for generating bounded control waveforms."""
+
     t: np.ndarray
     max_frequency: float
     mode: TrigMode = TrigMode.AMP_FREQ_PHASE
@@ -56,10 +62,32 @@ class TrigBasis:
         return 1 + self.basis_size * self.num_coeffs_per_basis
 
     def sample_coefficients(self, rng: np.random.Generator | None = None) -> np.ndarray:
+        """Draw a coefficient vector in ``[-1, 1]`` matching this basis layout.
+
+        Parameters
+        ----------
+        rng:
+            Optional random number generator used to sample the coefficients.
+
+        Returns
+        -------
+        numpy.ndarray
+            Float64 vector with shape ``(num_coeffs,)``.
+        """
+
         generator = rng or np.random.default_rng()
         return generator.uniform(-1.0, 1.0, size=self.num_coeffs)
 
     def generate_new_basis(self) -> "TrigBasis":
+        """Clone this basis configuration while resampling its fixed terms.
+
+        Returns
+        -------
+        TrigBasis
+            New basis object with the same configuration and newly sampled
+            fixed frequencies and phases.
+        """
+
         return TrigBasis(
             t=self.t.copy(),
             max_frequency=self.max_frequency,
@@ -72,6 +100,25 @@ class TrigBasis:
         )
 
     def control(self, coeffs) -> np.ndarray:
+        """Map a coefficient vector onto a tapered control waveform on ``t``.
+
+        Parameters
+        ----------
+        coeffs:
+            Coefficient vector with shape ``(num_coeffs,)``.
+
+        Returns
+        -------
+        numpy.ndarray
+            Float64 control waveform sampled on ``t`` and scaled to respect
+            ``max_amplitude``.
+
+        Raises
+        ------
+        ValueError
+            If ``coeffs`` does not match the expected coefficient shape.
+        """
+
         coeffs_arr = np.asarray(coeffs, dtype=np.float64)
         if coeffs_arr.shape != (self.num_coeffs,):
             raise ValueError(

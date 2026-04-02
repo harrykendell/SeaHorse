@@ -28,6 +28,15 @@ else:
             raise RuntimeError("Failed to import the source seahorse package from src/python.")
 
 
+def pytest_configure(config: pytest.Config) -> None:
+    """Register local test markers when pytest is launched outside the package root."""
+
+    config.addinivalue_line(
+        "markers",
+        "native: exercises the compiled nanobind extension when available",
+    )
+
+
 def _iter_native_candidates() -> list[Path]:
     ext_suffix = sysconfig.get_config_var("EXT_SUFFIX")
     suffixes = [suffix for suffix in (ext_suffix, ".abi3.so", ".pyd") if suffix]
