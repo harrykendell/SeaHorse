@@ -23,49 +23,79 @@ Greenfield rewrite of SeaHorse as a Python-first library with a small C++ core.
 
 This scaffold expects:
 
-- `nanobind`
-- `scikit-build-core`
-- an available `cmake`
+- Python build tooling for `nanobind`, `scikit-build-core`, and `cmake`
 
 The current repository already vendors `Eigen` and `Spectra`, so the new project
 reuses those from the parent repo instead of introducing another dependency chain.
 
-For local development, the default flow is an editable install:
+## Local Workflow
+
+Use the repo itself as the live package during development:
 
 ```bash
-./scripts/build_and_install_local.sh
+./scripts/install_editable.sh
 ```
 
-If you already have a Conda environment activated, the blank form above
-installs into that active environment automatically.
+That installs Seahorse in editable mode and builds the native `_core` module in
+place. Python changes are then live from this checkout immediately.
 
-If you want to validate the actual wheel artifact locally instead, use:
+After changing C++ or `CMakeLists.txt`, rebuild the native side with:
 
 ```bash
-./scripts/build_and_install_local.sh --wheel
+./scripts/rebuild_native.sh
 ```
 
-You can target a specific interpreter with:
+Run the test suite with:
 
 ```bash
-./scripts/build_and_install_local.sh --python .venv/bin/python
+./scripts/test.sh
 ```
 
-Or install straight into a Conda environment without activating it first:
+Build a regular wheel for installation into another environment or machine with:
 
 ```bash
-./scripts/build_and_install_local.sh --conda-env my-env
+./scripts/build_wheel.sh
 ```
+
+The scripts use the active environment by default. To target a specific Python
+interpreter, prefix the command with `PYTHON=/path/to/python`, for example:
+
+```bash
+PYTHON=.venv/bin/python ./scripts/install_editable.sh
+```
+
+Editable mode is configured as an in-place build, so:
+
+- Python imports resolve from `src/python`
+- the compiled `seahorse._core` extension is rebuilt into `src/python/seahorse`
+- static wheel builds stay inside `build/` and `dist/` instead of polluting the
+  source package
+
+After reinstalling, restart any already-running Python REPL, notebook kernel,
+or service process before checking C++ changes. The compiled `_core` extension
+stays loaded for the lifetime of the process, so reinstalling does not hot-swap
+an already-imported binary.
+
+Recommended loop:
+
+```bash
+./scripts/install_editable.sh
+# edit Python freely
+./scripts/rebuild_native.sh   # only when C++ changes
+./scripts/test.sh
+```
+
+When editing only Python, you usually do not need to reinstall anything.
+When editing C++, rerun `rebuild_native.sh`, then restart the Python process
+you use for testing.
 
 ## CI-built Wheels
 
-`.github/workflows/seahorse-wheels.yml` is intended to build wheel artifacts
-for the native extension in GitHub Actions.
+`.github/workflows/seahorse-wheels.yml` runs the test suite on pull requests and
+pushes, and on pushes it also builds a wheel artifact, installs that wheel into
+a clean environment, and reruns the tests.
 
-- Pull requests and pushes upload wheels as workflow artifacts
-- Version tags like `v0.1.0` can also publish those wheels as release assets
-
-That gives us a path to use prebuilt binaries instead of compiling locally:
+That gives us a path to use a prebuilt binary instead of compiling locally:
 
 ```bash
 pip install seahorse-0.1.0-...whl

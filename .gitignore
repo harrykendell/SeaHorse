@@ -36,6 +36,12 @@
 *.DS_Store
 *.pyc
 __pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+.cmake/
+*.egg-info/
 
 # Executables or analysis
 /output
@@ -46,9 +52,16 @@ __pycache__/
 *CMakeFiles
 *cmake_install.cmake
 *CMakeCache.txt
+*.ninja_deps
+*.ninja_log
+*.skbuild-info.json
+*build.ninja
+*CMakeInit.txt
 seahorse/build
 seahorse/dist
 seahorse/.venv
+seahorse/src/python/seahorse/_core*.so
+seahorse/src/python/seahorse/_core*.pyd
 seahorse-old/build
 seahorse-old/bin
 seahorse-old/test.json

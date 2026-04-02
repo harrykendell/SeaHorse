@@ -90,7 +90,21 @@ target_include_directories(_core PRIVATE
   "${SEAHORSE_NEXT_SPECTRA_INCLUDE_DIR}"
 )
 
-install(TARGETS _core LIBRARY DESTINATION seahorse)
+# Only editable installs should place the native module directly into the
+# source tree. Wheel builds should stay inside the build directory so they do
+# not leave compiled artifacts behind in src/python/seahorse.
+if(SKBUILD_STATE STREQUAL "editable")
+  set(SEAHORSE_PYTHON_PACKAGE_DIR "${PROJECT_SOURCE_DIR}/src/python/seahorse")
+  set_target_properties(_core PROPERTIES
+    LIBRARY_OUTPUT_DIRECTORY "${SEAHORSE_PYTHON_PACKAGE_DIR}$<0:>"
+    RUNTIME_OUTPUT_DIRECTORY "${SEAHORSE_PYTHON_PACKAGE_DIR}$<0:>"
+  )
+endif()
+
+install(TARGETS _core
+  LIBRARY DESTINATION seahorse
+  RUNTIME DESTINATION seahorse
+)
 install(
   DIRECTORY src/python/seahorse/
   DESTINATION seahorse

@@ -6,25 +6,26 @@ on:
     paths:
       - ".github/workflows/seahorse-wheels.yml"
       - ".gitmodules"
+      - "libs/**"
+      - "README.md"
       - "seahorse/**"
-      - "seahorse-old/**"
   push:
-    branches:
-      - main
-    tags:
-      - "v*"
     paths:
       - ".github/workflows/seahorse-wheels.yml"
       - ".gitmodules"
+      - "libs/**"
+      - "README.md"
       - "seahorse/**"
-      - "seahorse-old/**"
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   test-suite:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: seahorse
 
     steps:
       - name: Check out repository
@@ -37,17 +38,23 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install project and test dependencies
+      - name: Upgrade pip
+        run: python -m pip install --upgrade pip
+
+      - name: Install editable package
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install -e "seahorse[dev]"
+          ./scripts/install_editable.sh
 
       - name: Run pytest suite
-        run: python -m pytest seahorse/tests/python
+        run: ./scripts/test.sh
 
-  build-linux-wheels:
+  build-wheel:
+    if: github.event_name != 'pull_request'
     needs: test-suite
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: seahorse
 
     steps:
       - name: Check out repository
@@ -60,25 +67,22 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Build wheels
-        uses: pypa/cibuildwheel@v2.21.3
-        with:
-          package-dir: seahorse
-          output-dir: seahorse/dist
-        env:
-          CIBW_ARCHS_LINUX: x86_64
-          CIBW_TEST_REQUIRES: pytest
-          CIBW_TEST_COMMAND: python -m pytest {project}/seahorse/tests/python
+      - name: Upgrade pip
+        run: python -m pip install --upgrade pip
+
+      - name: Build wheel
+        run: ./scripts/build_wheel.sh
+
+      - name: Verify wheel in a clean environment
+        run: |
+          python -m venv /tmp/seahorse-wheel-test
+          /tmp/seahorse-wheel-test/bin/python -m pip install --upgrade pip
+          /tmp/seahorse-wheel-test/bin/python -m pip install "$(ls -1t dist/seahorse-*.whl | head -n 1)" pytest
+          PYTHON=/tmp/seahorse-wheel-test/bin/python ./scripts/test.sh
 
       - name: Upload wheel artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: seahorse-linux-wheels
+          name: seahorse-wheel-py311-linux
           path: seahorse/dist/*.whl
           if-no-files-found: error
-
-      - name: Publish tagged wheels to GitHub release
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v2
-        with:
-          files: seahorse/dist/*.whl

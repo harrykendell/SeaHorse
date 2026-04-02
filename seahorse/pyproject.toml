@@ -1,5 +1,6 @@
 [build-system]
 requires = [
+  "cmake>=3.21",
   "nanobind>=2.4",
   "scikit-build-core>=0.10",
 ]
@@ -29,9 +30,12 @@ classifiers = [
 
 [project.optional-dependencies]
 dev = [
+  "cmake>=3.21",
   "mypy>=1.11",
+  "nanobind>=2.4",
   "pytest>=8.0",
   "ruff>=0.6",
+  "scikit-build-core>=0.10",
 ]
 
 [tool.ruff]
@@ -50,12 +54,9 @@ build-dir = "build/{wheel_tag}"
 cmake.source-dir = "."
 wheel.packages = ["src/python/seahorse"]
 
-[tool.cibuildwheel]
-build = "cp39-* cp310-* cp311-* cp312-*"
-skip = "pp* *-musllinux_* *-win32"
-build-verbosity = 1
-test-command = "python -c \"import seahorse._core as core; grid = core.Grid1D(8, -1.0, 1.0); print(grid.dim)\""
-archs = ["auto64"]
+[tool.scikit-build.editable]
+mode = "inplace"
+verbose = true
 
 [tool.pytest.ini_options]
 addopts = "-ra"

@@ -16,9 +16,14 @@ Typical development flow:
 
 ```bash
 cd seahorse
-./scripts/build_and_install_local.sh
-python -m pytest tests/python
+./scripts/install_editable.sh
+./scripts/rebuild_native.sh   # after C++ changes
+./scripts/test.sh
+./scripts/build_wheel.sh      # build a wheel in dist/
 ```
+
+Use `PYTHON=/path/to/python` in front of any script if you want to target a
+specific virtualenv or Conda environment.
 
 ## Legacy Project
 
